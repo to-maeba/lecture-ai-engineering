@@ -16,7 +16,7 @@ from sklearn.pipeline import Pipeline
 DATA_PATH = os.path.join(os.path.dirname(__file__), "../data/Titanic.csv")
 MODEL_DIR = os.path.join(os.path.dirname(__file__), "../models")
 MODEL_PATH = os.path.join(MODEL_DIR, "titanic_model.pkl")
-
+MODEL_PATH2 = os.path.join(MODEL_DIR, "titanic_model_prev.pkl")
 
 @pytest.fixture
 def sample_data():
@@ -108,6 +108,10 @@ def test_model_exists():
         pytest.skip("モデルファイルが存在しないためスキップします")
     assert os.path.exists(MODEL_PATH), "モデルファイルが存在しません"
 
+    if not os.path.exists(MODEL_PATH2):
+        pytest.skip("前回のモデルファイルが存在しないためスキップします")
+    assert os.path.exists(MODEL_PATH2), "前回のモデルファイルが存在しません"
+
 
 def test_model_accuracy(train_model):
     """モデルの精度を検証"""
@@ -116,6 +120,7 @@ def test_model_accuracy(train_model):
     # 予測と精度計算
     y_pred = model.predict(X_test)
     accuracy = accuracy_score(y_test, y_pred)
+    print(f"モデルの精度: {accuracy:.4f}")
 
     # Titanicデータセットでは0.75以上の精度が一般的に良いとされる
     assert accuracy >= 0.75, f"モデルの精度が低すぎます: {accuracy}"
@@ -131,7 +136,7 @@ def test_model_inference_time(train_model):
     end_time = time.time()
 
     inference_time = end_time - start_time
-
+    print(f"推論時間: {inference_time:.4f}秒")
     # 推論時間が1秒未満であることを確認
     assert inference_time < 1.0, f"推論時間が長すぎます: {inference_time}秒"
 
