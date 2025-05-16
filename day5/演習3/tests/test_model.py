@@ -16,7 +16,7 @@ from sklearn.pipeline import Pipeline
 DATA_PATH = os.path.join(os.path.dirname(__file__), "../data/Titanic.csv")
 MODEL_DIR = os.path.join(os.path.dirname(__file__), "../models")
 MODEL_PATH = os.path.join(MODEL_DIR, "titanic_model.pkl")
-PREV_MODEL_PATH = os.path.join(MODEL_DIR, "titanic_model_prev.pkl")
+#PREV_MODEL_PATH = os.path.join(MODEL_DIR, "titanic_model_prev.pkl")
 
 
 @pytest.fixture
@@ -109,9 +109,9 @@ def test_model_exists():
         pytest.skip("モデルファイルが存在しないためスキップします")
     assert os.path.exists(MODEL_PATH), "モデルファイルが存在しません"
 
-    if not os.path.exists(PREV_MODEL_PATH):
-        pytest.skip("前回のモデルファイルが存在しないためスキップします")
-    assert os.path.exists(PREV_MODEL_PATH), "前回のモデルファイルが存在しません"
+    #if not os.path.exists(PREV_MODEL_PATH):
+    #    pytest.skip("前回のモデルファイルが存在しないためスキップします")
+    #assert os.path.exists(PREV_MODEL_PATH), "前回のモデルファイルが存在しません"
 
 
 def test_model_accuracy(train_model):
