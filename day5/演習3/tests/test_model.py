@@ -102,6 +102,7 @@ def train_model(sample_data, preprocessor):
 
     return model, X_test, y_test
 
+
 @pytest.fixture
 def load_model():
     """モデルを読み込む"""
