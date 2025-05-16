@@ -16,7 +16,7 @@ from sklearn.pipeline import Pipeline
 DATA_PATH = os.path.join(os.path.dirname(__file__), "../data/Titanic.csv")
 MODEL_DIR = os.path.join(os.path.dirname(__file__), "../models")
 MODEL_PATH = os.path.join(MODEL_DIR, "titanic_model.pkl")
-# PREV_MODEL_PATH = os.path.join(MODEL_DIR, "titanic_model_prev.pkl")
+PREV_MODEL_PATH = os.path.join(MODEL_DIR, "titanic_model_prev.pkl")
 
 
 @pytest.fixture
@@ -102,6 +102,13 @@ def train_model(sample_data, preprocessor):
 
     return model, X_test, y_test
 
+@pytest.fixture
+def load_model():
+    """モデルを読み込む"""
+    with open(PREV_MODEL_PATH, "rb") as f:
+        model = pickle.load(f)
+    return model
+
 
 def test_model_exists():
     """モデルファイルが存在するか確認"""
@@ -109,27 +116,38 @@ def test_model_exists():
         pytest.skip("モデルファイルが存在しないためスキップします")
     assert os.path.exists(MODEL_PATH), "モデルファイルが存在しません"
 
-    # if not os.path.exists(PREV_MODEL_PATH):
-    #    pytest.skip("前回のモデルファイルが存在しないためスキップします")
-    # assert os.path.exists(PREV_MODEL_PATH), "前回のモデルファイルが存在しません"
+    if not os.path.exists(PREV_MODEL_PATH):
+        pytest.skip("前回のモデルファイルが存在しないためスキップします")
+    assert os.path.exists(PREV_MODEL_PATH), "前回のモデルファイルが存在しません"
 
 
-def test_model_accuracy(train_model):
+def test_model_accuracy(train_model, load_model):
     """モデルの精度を検証"""
     model, X_test, y_test = train_model
+    prev_model = load_model
 
     # 予測と精度計算
     y_pred = model.predict(X_test)
     accuracy = accuracy_score(y_test, y_pred)
-    print(f"モデルの精度: {accuracy:.4f}")
+
+    prev_y_pred = prev_model.predict(X_test)
+    prev_accuracy = accuracy_score(y_test, prev_y_pred)
+
+    print(f"モデルの精度: {accuracy:.4f}, 前回モデル：{prev_accuracy:.4f}")
 
     # Titanicデータセットでは0.75以上の精度が一般的に良いとされる
-    assert accuracy >= 0.75, f"モデルの精度が低すぎます: {accuracy}"
+    assert accuracy >= prev_accuracy, f"モデルの精度が低すぎます: {accuracy}"
 
 
-def test_model_inference_time(train_model):
+def test_model_inference_time(train_model, load_model):
     """モデルの推論時間を検証"""
     model, X_test, _ = train_model
+    prev_model = load_model
+    # 前回モデルの推論時間を計測
+    start_time = time.time()
+    prev_model.predict(X_test)
+    end_time = time.time()
+    prev_inference_time = end_time - start_time
 
     # 推論時間の計測
     start_time = time.time()
@@ -137,9 +155,9 @@ def test_model_inference_time(train_model):
     end_time = time.time()
 
     inference_time = end_time - start_time
-    print(f"推論時間: {inference_time:.4f}秒")
+    print(f"推論時間: {inference_time:.4f}秒, 前回モデル：{prev_inference_time:.4f}秒")
     # 推論時間が1秒未満であることを確認
-    assert inference_time < 1.0, f"推論時間が長すぎます: {inference_time}秒"
+    assert inference_time < prev_inference_time, f"推論時間が長すぎます: {inference_time}秒"
 
 
 def test_model_reproducibility(sample_data, preprocessor):
