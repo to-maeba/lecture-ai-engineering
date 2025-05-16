@@ -18,6 +18,7 @@ MODEL_DIR = os.path.join(os.path.dirname(__file__), "../models")
 MODEL_PATH = os.path.join(MODEL_DIR, "titanic_model.pkl")
 MODEL_PATH2 = os.path.join(MODEL_DIR, "titanic_model_prev.pkl")
 
+
 @pytest.fixture
 def sample_data():
     """テスト用データセットを読み込む"""
@@ -173,6 +174,4 @@ def test_model_reproducibility(sample_data, preprocessor):
     predictions1 = model1.predict(X_test)
     predictions2 = model2.predict(X_test)
 
-    assert np.array_equal(
-        predictions1, predictions2
-    ), "モデルの予測結果に再現性がありません"
+    assert np.array_equal(predictions1, predictions2), "モデルの予測結果に再現性がありません"
